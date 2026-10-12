@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumière Hair Studio - ระบบสมาชิกและจองคิวทำผม</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Prompt', sans-serif; }
+    </style>
+</head>
+<body class="bg-pink-50 text-gray-800 min-h-screen pb-12">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchSection('home')">
+                <div class="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center text-rose-600 font-bold text-xl">
+                    <i class="fa-solid fa-scissors"></i>
+                </div>
+                <span class="text-xl font-bold text-gray-800">Lumière Hair Studio</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button onclick="switchSection('home')" id="nav-home" class="px-3 py-1.5 rounded-full text-sm font-medium bg-rose-500 text-white">หน้าหลัก</button>
+                <button onclick="switchSection('booking')" id="nav-booking" class="px-3 py-1.5 rounded-full text-sm font-medium text-gray-600 hover:bg-gray-100">จองคิว</button>
+                <button onclick="switchSection('my-booking')" id="nav-my-booking" class="px-3 py-1.5 rounded-full text-sm font-medium text-gray-600 hover:bg-gray-100">คิวของฉัน</button>
+                
+                <!-- Profile / Auth Button -->
+                <div id="auth-btn-container">
+                    <button onclick="switchSection('login')" id="nav-login" class="px-3 py-1.5 rounded-full text-sm font-medium bg-rose-100 text-rose-600 hover:bg-rose-200">
+                        <i class="fa-solid fa-user mr-1"></i><span>เข้าสู่ระบบ / สมัครสมาชิก</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Notification Bar Alert (เตือน 20 นาที) -->
+    <div id="reminder-alert" class="bg-amber-500 text-white px-4 py-3 shadow-lg hidden">
+        <div class="max-w-4xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-bell text-xl animate-bounce"></i>
+                <span class="text-sm font-medium"><b>แจ้งเตือน:</b> อีกประมาณ 20 นาทีจะถึงเวลาคิวทำผมของคุณ! กรุณาเดินทางมายังร้าน</span>
+            </div>
+            <button onclick="switchSection('my-booking')" class="bg-white text-amber-600 px-3 py-1 rounded-lg text-xs font-bold hover:bg-amber-50">ดูคิว/เช็คอิน</button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-4xl mx-auto px-4 py-6">
+
+        <!-- 1. LOGIN SECTION -->
+        <div id="sec-login" class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 max-w-md mx-auto">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
+                    <i class="fa-solid fa-user-lock"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800">เข้าสู่ระบบ</h2>
+                <p class="text-gray-500 text-sm mt-1">ยินดีต้อนรับกลับมาอีกครั้ง!</p>
+            </div>
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">อีเมล / เบอร์โทรศัพท์</label>
+                    <input type="text" id="login-email" placeholder="เช่น sita@gmail.com หรือ 0891234567" required class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">รหัสผ่าน</label>
+                    <input type="password" id="login-password" placeholder="••••••••" required class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none">
+                </div>
+                <button type="submit" class="w-full bg-rose-500 text-white py-3 rounded-xl font-bold hover:bg-rose-600 transition shadow">เข้าสู่ระบบ</button>
+            </form>
+            <div class="text-center mt-6 pt-4 border-t">
+                <p class="text-sm text-gray-600">ยังไม่มีบัญชีสมาชิก? <button onclick="switchSection('register')" class="text-rose-600 font-bold underline hover:text-rose-700">สมัครสมาชิกที่นี่</button></p>
+            </div>
+        </div>
+
+        <!-- 2. REGISTER SECTION (สมัครสมาชิก) -->
+        <div id="sec-register" class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 max-w-md mx-auto hidden">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
+                    <i class="fa-solid fa-user-plus"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800">สมัครสมาชิกใหม่</h2>
+                <p class="text-gray-500 text-sm mt-1">รับสิทธิประโยชน์และสะสมแต้มส่วนลด</p>
+            </div>
+            <form onsubmit="handleRegister(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">ชื่อ - นามสกุล</label>
+                    <input type="text" id="reg-name" placeholder="เช่น คุณสิตา สวยงาม" required class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">เบอร์โทรศัพท์</label>
+                    <input type="tel" id="reg-phone" placeholder="0891234567" required class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">อีเมล</label>
+                    <input type="email" id="reg-email" placeholder="sita@example.com" required class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">รหัสผ่าน</label>
+                    <input type="password" id="reg-password" placeholder="ตั้งรหัสผ่านอย่างน้อย 6 ตัว" required minlength="6" class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none">
+                </div>
+                <button type="submit" class="w-full bg-rose-500 text-white py-3 rounded-xl font-bold hover:bg-rose-600 transition shadow">ยืนยันลงทะเบียน</button>
+            </form>
+            <div class="text-center mt-6 pt-4 border-t">
+                <p class="text-sm text-gray-600">มีบัญชีอยู่แล้ว? <button onclick="switchSection('login')" class="text-rose-600 font-bold underline hover:text-rose-700">เข้าสู่ระบบ</button></p>
+            </div>
+        </div>
+
+        <!-- 3. PROFILE SECTION (หน้าโปรไฟล์สมาชิก) -->
+        <div id="sec-profile" class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 hidden space-y-6">
+            <div class="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 border-b pb-6">
+                <!-- Profile Image & Upload -->
+                <div class="relative group cursor-pointer" onclick="document.getElementById('profile-upload').click()">
+                    <img id="profile-img" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" class="w-24 h-24 rounded-full object-cover border-4 border-rose-200 shadow-md">
+                    <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition">
+                        <i class="fa-solid fa-camera text-xl"></i>
+                    </div>
+                    <input type="file" id="profile-upload" class="hidden" accept="image/*" onchange="previewProfileImage(event)">
+                </div>
+                
+                <div class="text-center sm:text-left flex-1">
+                    <h2 id="prof-display-name" class="text-2xl font-bold text-gray-800">คุณสิตา สวยงาม</h2>
+                    <p id="prof-display-email" class="text-sm text-gray-500">sita@example.com</p>
+                    <span class="inline-block bg-rose-100 text-rose-600 px-3 py-1 rounded-full text-xs font-bold mt-2"><i class="fa-solid fa-crown text-amber-500 mr-1"></i>สมาชิก VIP</span>
+                </div>
+
+                <div class="bg-gradient-to-r from-amber-400 to-rose-400 text-white px-5 py-3 rounded-2xl text-center shadow">
+                    <p class="text-xs opacity-90">คะแนนสะสม</p>
+                    <p class="text-2xl font-bold">120 <span class="text-xs">แต้ม</span></p>
+                </div>
+            </div>
+
+            <!-- Profile Edit Form -->
+            <form onsubmit="saveProfile(event)" class="space-y-4 max-w-lg">
+                <h3 class="font-bold text-gray-800">จัดการข้อมูลส่วนตัว</h3>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">ชื่อ - นามสกุล</label>
+                    <input type="text" id="edit-name" class="w-full px-4 py-2 border rounded-xl">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">เบอร์โทรศัพท์</label>
+                    <input type="tel" id="edit-phone" class="w-full px-4 py-2 border rounded-xl">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">อีเมล</label>
+                    <input type="email" id="edit-email" class="w-full px-4 py-2 border rounded-xl">
+                </div>
+                <div class="pt-2 flex space-x-3">
+                    <button type="submit" class="bg-rose-500 text-white px-6 py-2 rounded-xl font-bold text-sm hover:bg-rose-600">บันทึกการเปลี่ยนแปลง</button>
+                    <button type="button" onclick="handleLogout()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-xl text-sm font-medium hover:bg-gray-300"><i class="fa-solid fa-right-from-bracket mr-1"></i>ออกจากระบบ</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 4. HOME SECTION -->
+        <div id="sec-home" class="hidden space-y-6">
+            <div class="bg-gradient-to-r from-rose-400 to-pink-500 text-white rounded-3xl p-8 text-center shadow-lg">
+                <h1 class="text-3xl font-bold mb-2">ยินดีต้อนรับสู่ Lumière Hair Studio</h1>
+                <p class="opacity-90 text-sm mb-6">ร้านทำผมสไตล์พรีเมียม ออกแบบทรงผมและดูแลเส้นผมโดยช่างผู้เชี่ยวชาญ</p>
+                <button onclick="switchSection('booking')" class="bg-white text-rose-600 px-8 py-3 rounded-full font-bold shadow hover:bg-pink-50 transition">จองคิวทำผมทันที</button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-pink-100">
+                    <i class="fa-solid fa-calendar-day text-rose-500 text-2xl mb-2"></i>
+                    <h3 class="font-bold text-gray-800">เปิดบริการทุกวัน</h3>
+                    <p class="text-xs text-gray-500 mt-1">10:00 - 19:00 น.</p>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-pink-100">
+                    <i class="fa-solid fa-user-nurse text-rose-500 text-2xl mb-2"></i>
+                    <h3 class="font-bold text-gray-800">เลือกช่างได้ตามใจ</h3>
+                    <p class="text-xs text-gray-500 mt-1">ทีมช่างโปรมากประสบการณ์</p>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-pink-100">
+                    <i class="fa-solid fa-bell text-rose-500 text-2xl mb-2"></i>
+                    <h3 class="font-bold text-gray-800">แจ้งเตือนก่อนถึงคิว</h3>
+                    <p class="text-xs text-gray-500 mt-1">เตือนล่วงหน้า 20 นาที</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. BOOKING WIZARD -->
+        <div id="sec-booking" class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 hidden">
+            <h2 class="text-2xl font-bold text-gray-800 text-center mb-6">ขั้นตอนการจองคิวทำผม</h2>
+            
+            <div class="flex justify-between items-center mb-8 max-w-lg mx-auto text-xs sm:text-sm">
+                <span id="step-b-1" class="font-bold text-rose-600">1. เลือกบริการ/ช่าง</span>➔
+                <span id="step-b-2" class="text-gray-400">2. วันเวลา</span>➔
+                <span id="step-b-3" class="text-gray-400">3. ชำระเงิน</span>➔
+                <span id="step-b-4" class="text-gray-400">4. ยืนยัน</span>
+            </div>
+
+            <!-- BOOKING STEP 1 -->
+            <div id="b-step-1" class="space-y-6">
+                <div>
+                    <h3 class="font-bold text-gray-800 mb-3">1. เลือกบริการ (เลือกได้หลายรายการ)</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <label class="flex items-start p-3 border rounded-xl cursor-pointer hover:border-rose-400">
+                            <input type="checkbox" name="srv" value="ตัดผม + สระไดร์" data-price="350" class="mt-1 text-rose-600">
+                            <div class="ml-3">
+                                <p class="font-semibold text-sm">ตัดผม + สระไดร์</p>
+                                <p class="text-xs text-rose-600 font-bold">฿350</p>
+                            </div>
+                        </label>
+                        <label class="flex items-start p-3 border rounded-xl cursor-pointer hover:border-rose-400">
+                            <input type="checkbox" name="srv" value="ทำสีผมแฟชั่น" data-price="1500" class="mt-1 text-rose-600">
+                            <div class="ml-3">
+                                <p class="font-semibold text-sm">ทำสีผมแฟชั่น / ปิดผมขาว</p>
+                                <p class="text-xs text-rose-600 font-bold">฿1,500</p>
+                            </div>
+                        </label>
+                        <label class="flex items-start p-3 border rounded-xl cursor-pointer hover:border-rose-400">
+                            <input type="checkbox" name="srv" value="ดัดผมดิจิตอล" data-price="2000" class="mt-1 text-rose-600">
+                            <div class="ml-3">
+                                <p class="font-semibold text-sm">ดัดผมดิจิตอล / วอลลุ่ม</p>
+                                <p class="text-xs text-rose-600 font-bold">฿2,000</p>
+                            </div>
+                        </label>
+                        <label class="flex items-start p-3 border rounded-xl cursor-pointer hover:border-rose-400">
+                            <input type="checkbox" name="srv" value="ทรีทเม้นท์เคราติน" data-price="800" class="mt-1 text-rose-600">
+                            <div class="ml-3">
+                                <p class="font-semibold text-sm">ทรีทเม้นท์เคราตินฟื้นฟูผมเสีย</p>
+                                <p class="text-xs text-rose-600 font-bold">฿800</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-gray-800 mb-3">2. เลือกช่างทำผม</h3>
+                    <div class="grid grid-cols-3 gap-3">
+                        <label class="border p-3 rounded-xl text-center cursor-pointer hover:border-rose-400">
+                            <input type="radio" name="stylist" value="ช่างแอน (Senior Stylist)" checked class="hidden">
+                            <div class="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-2 text-rose-600 font-bold">A</div>
+                            <p class="text-xs font-bold">ช่างแอน</p>
+                            <p class="text-[10px] text-gray-500">Senior</p>
+                        </label>
+                        <label class="border p-3 rounded-xl text-center cursor-pointer hover:border-rose-400">
+                            <input type="radio" name="stylist" value="ช่างเมย์ (Color Specialist)" class="hidden">
+                            <div class="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-2 text-rose-600 font-bold">M</div>
+                            <p class="text-xs font-bold">ช่างเมย์</p>
+                            <p class="text-[10px] text-gray-500">Color Spec.</p>
+                        </label>
+                        <label class="border p-3 rounded-xl text-center cursor-pointer hover:border-rose-400">
+                            <input type="radio" name="stylist" value="ช่างคนไหนก็ได้" class="hidden">
+                            <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-2 text-gray-500 font-bold">?</div>
+                            <p class="text-xs font-bold">ใครก็ได้</p>
+                            <p class="text-[10px] text-gray-500">จัดตามคิวว่าง</p>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex justify-end pt-4">
+                    <button onclick="goBStep(2)" class="bg-rose-500 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-rose-600">ถัดไป (เลือกระบบเวลา)</button>
+                </div>
+            </div>
+
+            <!-- BOOKING STEP 2 -->
+            <div id="b-step-2" class="space-y-6 hidden">
+                <h3 class="font-bold text-gray-800">เลือกวันที่และรอบเวลาเข้ารับบริการ</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">วันที่</label>
+                        <input type="date" id="book-date" class="w-full px-4 py-2.5 border rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">รอบเวลา</label>
+                        <select id="book-time" class="w-full px-4 py-2.5 border rounded-xl">
+                            <option value="10:00 น.">10:00 - 11:30 น.</option>
+                            <option value="13:00 น.">13:00 - 14:30 น.</option>
+                            <option value="15:00 น.">15:00 - 16:30 น.</option>
+                            <option value="17:00 น.">17:00 - 18:30 น.</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex justify-between pt-4">
+                    <button onclick="goBStep(1)" class="bg-gray-200 text-gray-700 px-6 py-2.5 rounded-xl">ย้อนกลับ</button>
+                    <button onclick="goBStep(3)" class="bg-rose-500 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-rose-600">ถัดไป (ชำระเงิน)</button>
+                </div>
+            </div>
+
+            <!-- BOOKING STEP 3 -->
+            <div id="b-step-3" class="space-y-6 hidden">
+                <h3 class="font-bold text-gray-800">เลือกช่องทางการชำระเงิน</h3>
+                <div id="pay-summary" class="bg-pink-50 p-4 rounded-xl text-sm space-y-1"></div>
+
+                <div class="space-y-3">
+                    <label class="flex items-center p-3 border rounded-xl cursor-pointer">
+                        <input type="radio" name="payment" value="พร้อมเพย์ QR Code" checked class="text-rose-600">
+                        <span class="ml-3 font-semibold text-sm"><i class="fa-solid fa-qrcode mr-2 text-rose-500"></i>พร้อมเพย์ (PromptPay QR Code)</span>
+                    </label>
+                    <label class="flex items-center p-3 border rounded-xl cursor-pointer">
+                        <input type="radio" name="payment" value="บัตรเครดิต/เดบิต" class="text-rose-600">
+                        <span class="ml-3 font-semibold text-sm"><i class="fa-solid fa-credit-card mr-2 text-rose-500"></i>บัตรเครดิต / เดบิต</span>
+                    </label>
+                </div>
+
+                <div class="flex justify-between pt-4">
+                    <button onclick="goBStep(2)" class="bg-gray-200 text-gray-700 px-6 py-2.5 rounded-xl">ย้อนกลับ</button>
+                    <button onclick="confirmBookingProcess()" class="bg-green-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-green-700">ชำระเงิน & ยืนยันการจอง</button>
+                </div>
+            </div>
+
+            <!-- BOOKING STEP 4 -->
+            <div id="b-step-4" class="text-center py-8 space-y-4 hidden">
+                <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto text-3xl">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800">ยืนยันการจองคิวสำเร็จ!</h2>
+                <p class="text-sm text-gray-600">ระบบได้รับการชำระเงินและการจองคิวเรียบร้อยแล้ว</p>
+                <div class="pt-4">
+                    <button onclick="switchSection('my-booking')" class="bg-rose-500 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-rose-600">ดูรายละเอียดคิวของคุณ</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. MY BOOKING SECTION -->
+        <div id="sec-my-booking" class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 hidden space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800">คิวทำผมของฉัน</h2>
+            <div id="my-booking-card" class="border border-pink-200 rounded-2xl p-6 bg-pink-50/50 space-y-4">
+                <!-- Dynamic Content -->
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // Default User State
+        let loggedUser = null; 
+        let activeBooking = null;
+
+        document.getElementById('book-date').valueAsDate = new Date();
+
+        function switchSection(sec) {
+            const sections = ['login', 'register', 'profile', 'home', 'booking', 'my-booking'];
+            sections.forEach(s => document.getElementById(`sec-${s}`).classList.add('hidden'));
+            document.getElementById(`sec-${sec}`).classList.remove('hidden');
+
+            if(sec === 'my-booking') renderMyBooking();
+        }
+
+        // 1. REGISTER
+        function handleRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('reg-name').value.trim();
+            const phone = document.getElementById('reg-phone').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+
+            loggedUser = { name, phone, email, img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' };
+            updateUserUI();
+            alert('สมัครสมาชิกสำเร็จ! เข้าสู่ระบบเรียบร้อยแล้ว');
+            switchSection('profile');
+        }
+
+        // 2. LOGIN
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            loggedUser = { 
+                name: 'คุณสิตา สวยงาม', 
+                phone: '0891234567', 
+                email: email || 'sita@example.com',
+                img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'
+            };
+            updateUserUI();
+            alert('เข้าสู่ระบบสำเร็จ!');
+            switchSection('profile');
+        }
+
+        // 3. LOGOUT
+        function handleLogout() {
+            loggedUser = null;
+            document.getElementById('auth-btn-container').innerHTML = `
+                <button onclick="switchSection('login')" class="px-3 py-1.5 rounded-full text-sm font-medium bg-rose-100 text-rose-600 hover:bg-rose-200">
+                    <i class="fa-solid fa-user mr-1"></i><span>เข้าสู่ระบบ / สมัครสมาชิก</span>
+                </button>
+            `;
+            alert('ออกจากระบบเรียบร้อยแล้ว');
+            switchSection('home');
+        }
+
+        // UPDATE PROFILE UI
+        function updateUserUI() {
+            if(!loggedUser) return;
+            document.getElementById('auth-btn-container').innerHTML = `
+                <button onclick="switchSection('profile')" class="flex items-center space-x-2 px-3 py-1 rounded-full bg-rose-100 text-rose-700 font-medium text-sm">
+                    <img src="${loggedUser.img}" class="w-6 h-6 rounded-full object-cover">
+                    <span>${loggedUser.name}</span>
+                </button>
+            `;
+            document.getElementById('prof-display-name').innerText = loggedUser.name;
+            document.getElementById('prof-display-email').innerText = loggedUser.email;
+            document.getElementById('edit-name').value = loggedUser.name;
+            document.getElementById('edit-phone').value = loggedUser.phone;
+            document.getElementById('edit-email').value = loggedUser.email;
+            document.getElementById('profile-img').src = loggedUser.img;
+        }
+
+        // PREVIEW PROFILE IMAGE
+        function previewProfileImage(e) {
+            const file = e.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    document.getElementById('profile-img').src = evt.target.result;
+                    if(loggedUser) loggedUser.img = evt.target.result;
+                    updateUserUI();
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // SAVE PROFILE EDIT
+        function saveProfile(e) {
+            e.preventDefault();
+            if(loggedUser) {
+                loggedUser.name = document.getElementById('edit-name').value;
+                loggedUser.phone = document.getElementById('edit-phone').value;
+                loggedUser.email = document.getElementById('edit-email').value;
+                updateUserUI();
+                alert('บันทึกข้อมูลส่วนตัวเรียบร้อยแล้ว!');
+            }
+        }
+
+        // BOOKING WIZARD STEPS
+        function goBStep(step) {
+            if(!loggedUser && step === 3) {
+                alert('กรุณาเข้าสู่ระบบหรือสมัครสมาชิกก่อนทำการจองครับ');
+                switchSection('login');
+                return;
+            }
+            if(step === 2) {
+                const srvs = document.querySelectorAll('input[name="srv"]:checked');
+                if(srvs.length === 0) {
+                    alert('กรุณาเลือกบริการอย่างน้อย 1 รายการครับ');
+                    return;
+                }
+            }
+            if(step === 3) {
+                const srvs = document.querySelectorAll('input[name="srv"]:checked');
+                let total = 0;
+                let srvNames = [];
+                srvs.forEach(s => {
+                    total += parseInt(s.dataset.price);
+                    srvNames.push(s.value);
+                });
+                const stylist = document.querySelector('input[name="stylist"]:checked').value;
+                const date = document.getElementById('book-date').value;
+                const time = document.getElementById('book-time').value;
+
+                document.getElementById('pay-summary').innerHTML = `
+                    <p><b>ผู้จอง:</b> ${loggedUser.name} (${loggedUser.phone})</p>
+                    <p><b>บริการ:</b> ${srvNames.join(', ')}</p>
+                    <p><b>ช่างทำผม:</b> ${stylist}</p>
+                    <p><b>วันเวลา:</b> ${date} | ${time}</p>
+                    <p class="text-rose-600 font-bold text-base mt-2">ยอดชำระสุทธิ: ฿${total.toLocaleString()}</p>
+                `;
+            }
+
+            for(let i=1; i<=4; i++) {
+                document.getElementById(`b-step-${i}`).classList.add('hidden');
+            }
+            document.getElementById(`b-step-${step}`).classList.remove('hidden');
+        }
+
+        function confirmBookingProcess() {
+            const srvs = document.querySelectorAll('input[name="srv"]:checked');
+            let total = 0;
+            let srvNames = [];
+            srvs.forEach(s => {
+                total += parseInt(s.dataset.price);
+                srvNames.push(s.value);
+            });
+
+            activeBooking = {
+                id: 'LUM-' + Math.floor(1000 + Math.random() * 9000),
+                user: loggedUser ? loggedUser.name : 'ลูกค้าทั่วไป',
+                phone: loggedUser ? loggedUser.phone : '-',
+                services: srvNames.join(', '),
+                stylist: document.querySelector('input[name="stylist"]:checked').value,
+                date: document.getElementById('book-date').value,
+                time: document.getElementById('book-time').value,
+                payment: document.querySelector('input[name="payment"]:checked').value,
+                total: total,
+                status: 'confirmed',
+                review: null
+            };
+
+            goBStep(4);
+            setTimeout(() => {
+                document.getElementById('reminder-alert').classList.remove('hidden');
+            }, 3000);
+        }
+
+        function renderMyBooking() {
+            const card = document.getElementById('my-booking-card');
+            if(!activeBooking) {
+                card.innerHTML = `<p class="text-center text-gray-500 py-6">คุณยังไม่มีรายการจองคิวในขณะนี้</p>`;
+                return;
+            }
+
+            let statusBadge = '';
+            let actionButtons = '';
+
+            if(activeBooking.status === 'confirmed') {
+                statusBadge = `<span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">ยืนยันการจองแล้ว</span>`;
+                actionButtons = `<button onclick="updateBookingStatus('checked_in')" class="w-full bg-emerald-600 text-white py-2.5 rounded-xl font-bold hover:bg-emerald-700"><i class="fa-solid fa-location-dot mr-1"></i>ถึงร้านแล้ว (เช็คอิน)</button>`;
+            } else if(activeBooking.status === 'checked_in') {
+                statusBadge = `<span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-bold">เช็คอินแล้ว (รอเรียกคิว)</span>`;
+                actionButtons = `<button onclick="updateBookingStatus('servicing')" class="w-full bg-purple-600 text-white py-2.5 rounded-xl font-bold hover:bg-purple-700"><i class="fa-solid fa-scissors mr-1"></i>เริ่มรับบริการทำผม</button>`;
+            } else if(activeBooking.status === 'servicing') {
+                statusBadge = `<span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-bold animate-pulse">กำลังรับบริการทำผม...</span>`;
+                actionButtons = `<button onclick="updateBookingStatus('completed')" class="w-full bg-rose-500 text-white py-2.5 rounded-xl font-bold hover:bg-rose-600"><i class="fa-solid fa-check-double mr-1"></i>รับบริการเสร็จสิ้น</button>`;
+            } else if(activeBooking.status === 'completed') {
+                statusBadge = `<span class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs font-bold">รับบริการเสร็จสิ้น</span>`;
+                if(!activeBooking.review) {
+                    actionButtons = `
+                        <div class="bg-white p-4 rounded-xl border space-y-3 text-left">
+                            <h4 class="font-bold text-gray-800 text-sm">ให้คะแนนและรีวิวบริการ</h4>
+                            <div class="flex space-x-2 text-amber-400 text-xl cursor-pointer">
+                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                            </div>
+                            <textarea id="review-text" placeholder="เขียนความประทับใจเกี่ยวกับช่าง หรือบริการ..." class="w-full p-2 border rounded-lg text-sm"></textarea>
+                            <button onclick="submitReview()" class="bg-rose-500 text-white px-4 py-2 rounded-lg text-sm font-bold w-full">ส่งรีวิว</button>
+                        </div>
+                    `;
+                } else {
+                    actionButtons = `<div class="bg-emerald-50 text-emerald-800 p-3 rounded-xl text-xs font-semibold">ขอบคุณสำหรับรีวิว: "${activeBooking.review}" ⭐⭐⭐⭐⭐</div>`;
+                }
+            }
+
+            card.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <div>
+                        <span class="text-xs text-gray-400">รหัสคิว: ${activeBooking.id}</span>
+                        <h3 class="font-bold text-lg text-gray-800">${activeBooking.services}</h3>
+                    </div>
+                    ${statusBadge}
+                </div>
+                <div class="text-sm text-gray-600 space-y-1">
+                    <p><b>ผู้จอง:</b> ${activeBooking.user} (${activeBooking.phone})</p>
+                    <p><b>ช่างผู้ให้บริการ:</b> ${activeBooking.stylist}</p>
+                    <p><b>วันเวลา:</b> ${activeBooking.date} | ${activeBooking.time}</p>
+                    <p><b>ชำระเงินผ่าน:</b> ${activeBooking.payment} (฿${activeBooking.total.toLocaleString()})</p>
+                </div>
+                <div class="pt-2">
+                    ${actionButtons}
+                </div>
+            `;
+        }
+
+        function updateBookingStatus(newStatus) {
+            if(activeBooking) {
+                activeBooking.status = newStatus;
+                if(newStatus === 'checked_in') {
+                    document.getElementById('reminder-alert').classList.add('hidden');
+                }
+                renderMyBooking();
+            }
+        }
+
+        function submitReview() {
+            const rev = document.getElementById('review-text').value.trim();
+            if(rev) {
+                activeBooking.review = rev;
+                renderMyBooking();
+                alert('ขอบคุณสำหรับรีวิวครับ!');
+            }
+        }
+    </script>
+</body>
+</html>
